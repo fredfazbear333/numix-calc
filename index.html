@@ -27,7 +27,7 @@
         <div class="home-logo-rect">
           <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo Large">
         </div>
-        <h1>Welcome Numix Calculator Beta</h1>
+        <h1>Welcome to Numix Calc Beta</h1>
         <div class="home-desc">
          Math made easy.
         </div>
@@ -90,5 +90,25 @@
     </section>
   </main>
   <script src="script.js"></script>
+  <footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Contact Us</h3>
+      <p>
+        Email: <a href="mailto:numix.calc@gmail.com">numix.calc@gmail.com</a>
+      </p>
+    </div>
+    <div class="footer-section">
+      <h3>Send Us Feedback</h3>
+      <form id="feedback-form" onsubmit="sendFeedback(event)">
+        <input type="email" id="feedback-email" placeholder="Your Email" required>
+        <textarea id="feedback-message" placeholder="Your feedback..." rows="2" required></textarea>
+        <button type="submit">Send</button>
+        <div id="feedback-status"></div>
+      </form>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
