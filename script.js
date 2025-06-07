@@ -742,3 +742,15 @@ if (aiSend) {
 // --- Initialize default calculators on load ---
 showAlgebra('simple');
 showGeometry('circle');
+function sendFeedback(event) {
+  event.preventDefault();
+  const email = document.getElementById('feedback-email').value.trim();
+  const message = document.getElementById('feedback-message').value.trim();
+  const status = document.getElementById('feedback-status');
+  // Simulate sending (replace with real backend if needed)
+  status.textContent = "Sending...";
+  setTimeout(() => {
+    status.textContent = "Thank you for your feedback!";
+    document.getElementById('feedback-form').reset();
+  }, 900);
+}
