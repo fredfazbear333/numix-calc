@@ -20,14 +20,10 @@ html, body {
   padding: 0;
 }
 
-.container, body {
-  min-height: 100vh;
-}
-
 .mode-selector {
   background: var(--gray-1);
   color: var(--white);
-  padding: 32px 0 0 0;
+  padding: 18px 0 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,34 +31,35 @@ html, body {
   border-radius: 0 var(--radius) var(--radius) 0;
   position: fixed;
   top: 0; left: 0; bottom: 0;
-  width: 220px;
+  width: 170px;
   z-index: 10;
   height: 100vh;
 }
 
-/* Sidebar logo rectangle */
 .logo {
   display: flex;
   align-items: center;
-  font-size: 2.1rem;
+  font-size: 1.7rem;
   font-weight: bold;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   color: var(--white);
   gap: 12px;
   text-shadow: 0 2px 12px #0008;
-  margin-bottom: 33px;
+  margin-bottom: 24px;
   user-select: none;
+  flex-direction: column;
 }
 .logo-img-rect {
-  width: 69px;
-  height: 40px;
+  width: 100px;
+  height: 100px;
   background: #fff1;
-  border-radius: 12px;
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 2px 8px #0004;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 8px;
 }
 .logo-img-rect img {
   width: 100%;
@@ -72,9 +69,8 @@ html, body {
   background: transparent;
 }
 
-/* Sidebar buttons */
 .mode-btn {
-  width: 160px;
+  width: 140px;
   padding: 14px 0;
   margin: 10px 0;
   border: none;
@@ -82,7 +78,7 @@ html, body {
   background: var(--gray-2);
   color: var(--white);
   font-weight: 600;
-  font-size: 1.07rem;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background var(--transition), color var(--transition), transform 0.2s;
   box-shadow: 0 2px 8px #0004;
@@ -93,39 +89,41 @@ html, body {
   transform: translateY(-2px) scale(1.04);
 }
 
-/* Main layout */
 .calculator-container {
   display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 32px;
-  padding: 48px 32px 48px 32px;
+  grid-template-columns: 1fr 220px;
+  gap: 18px;
+  padding: 20px 10px 20px 10px;
   min-height: 100vh;
-  margin-left: 220px;
+  margin-left: 170px;
 }
 
-.tools-sidebar {
+.tools-sidebar.right {
   background: var(--gray-2);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 24px 12px;
-  max-height: 70vh;
+  padding: 12px 4px;
+  max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  min-width: 180px;
+  grid-column: 2;
 }
 
 .tool-item {
-  padding: 14px 12px;
+  padding: 10px 8px;
   margin: 0;
   cursor: pointer;
   border-radius: var(--radius);
   background: transparent;
   color: var(--white);
   font-weight: 500;
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   border: none;
   transition: background var(--transition), color var(--transition);
+  text-align: left;
 }
 .tool-item:hover, .tool-item.active {
   background: var(--white);
@@ -136,7 +134,7 @@ html, body {
   background: var(--gray-1);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 32px 24px;
+  padding: 10px 8px;
   min-height: 340px;
   display: flex;
   flex-direction: column;
@@ -144,26 +142,31 @@ html, body {
   align-items: flex-start;
   position: relative;
   overflow: hidden;
-  max-width: 440px;
+  max-width: 520px;
+  grid-column: 1;
 }
 
-.calculator-grid {
+.calculator-grid, .sci-grid, .simple-grid {
   display: grid;
-  grid-template-columns: repeat(4, 64px);
-  grid-gap: 12px;
+  grid-template-columns: repeat(4, 70px);
+  grid-gap: 14px;
   justify-content: center;
   margin: 0 auto;
 }
 
-.calc-btn {
-  width: 60px;
-  height: 60px;
-  font-size: 1.25rem;
+.zero-btn {
+  grid-column: span 2;
+}
+
+.calc-btn, .sci-btn, .simple-btn {
+  width: 70px;
+  height: 70px;
+  font-size: 2rem;
   border: none;
   border-radius: 50%;
   background: var(--gray-3);
   color: var(--white);
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
   cursor: pointer;
   transition: background var(--transition), color var(--transition), transform 0.15s;
@@ -172,7 +175,8 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-.calc-btn:hover, .calc-btn.clear-btn:hover {
+.calc-btn:hover, .sci-btn:hover, .simple-btn:hover,
+.calc-btn.clear-btn:hover, .sci-btn.clear-btn:hover {
   background: var(--white);
   color: var(--black);
   transform: scale(1.08);
@@ -182,19 +186,14 @@ html, body {
   color: var(--white);
   font-weight: 500;
 }
-.form-btn-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
 
 input[type="text"], input[type="number"] {
-  width: 92%;
-  padding: 14px 10px;
-  border-radius: 12px;
+  width: 96%;
+  padding: 12px 10px;
+  border-radius: 8px;
   border: 1.5px solid var(--gray-3);
-  margin-bottom: 14px;
-  font-size: 1.2em;
+  margin-bottom: 10px;
+  font-size: 1.3em;
   background: var(--black-deep);
   color: var(--white);
   transition: border var(--transition);
@@ -206,73 +205,64 @@ input[type="text"]:focus, input[type="number"]:focus {
 
 form label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--white);
   font-weight: 500;
 }
 
 .animated-answer {
-  opacity: 0;
-  transform: translateY(16px) scale(0.97);
-  animation: fadeInUp 0.6s cubic-bezier(.4,0,.2,1) forwards;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--white);
-  margin-top: 14px;
-}
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  margin-top: 8px;
 }
 
 .ai-chat {
   background: var(--gray-2);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  max-width: 500px;
-  margin: 48px auto;
-  padding: 32px 24px;
+  max-width: 420px;
+  margin: 30px auto;
+  padding: 18px 12px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
 }
 
 #chat-messages {
-  min-height: 150px;
-  max-height: 250px;
+  min-height: 80px;
+  max-height: 160px;
   overflow-y: auto;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   border: 1px solid var(--gray-3);
-  padding: 14px;
-  border-radius: 10px;
+  padding: 8px;
+  border-radius: 8px;
   background: var(--black-deep);
   color: var(--white);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
 }
 
 .ai-input-row {
   display: flex;
-  gap: 10px;
+  gap: 6px;
 }
 
 #user-input {
   flex: 1;
-  padding: 12px 10px;
-  border-radius: 10px;
+  padding: 8px 6px;
+  border-radius: 8px;
   border: 1.5px solid var(--gray-3);
-  font-size: 1.1em;
+  font-size: 1em;
   background: var(--black-deep);
   color: var(--white);
 }
 
 #ai-send {
-  padding: 12px 22px;
+  padding: 8px 16px;
   background: var(--white);
   color: var(--black);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: background var(--transition), color var(--transition);
@@ -283,59 +273,65 @@ form label {
 }
 
 .mode-content { display: none; }
-#home { display: block; }
+#home { display: flex; }
 
-/* Homepage logo rectangle */
 .home-logo-rect {
-  width: 240px;
-  height: 120px;
-  margin: 0 auto 18px auto;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 24px auto;
   background: #fff1;
-  border-radius: 24px;
-  box-shadow: 0 2px 8px #0004;
+  border-radius: 32px;
+  box-shadow: 0 2px 18px #0004;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .home-logo-rect img {
-  width: 150%;
+  width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
   background: transparent;
 }
 
-/* Homepage background and content */
 .home-bg {
   min-height: 100vh;
   width: 100vw;
-  margin-left: 220px;
+  margin-left: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #181d2b;
   position: relative;
   overflow: hidden;
+  padding-top: 0;
 }
-.home-bg:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 700 400' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' font-size='48' fill='%235a6c8d' font-family='monospace' opacity='0.15'%3E%CE%A3 x%5E2 + y%5E2 = r%5E2%3C/text%3E%3Ctext x='50%25' y='60%25' text-anchor='middle' font-size='36' fill='%235a6c8d' font-family='monospace' opacity='0.12'%3E%CF%80 %E2%89%88 3.14159%3C/text%3E%3Ctext x='50%25' y='90%25' text-anchor='middle' font-size='40' fill='%235a6c8d' font-family='monospace' opacity='0.13'%3E%CE%B8 = sin%5E-1(y%2Fr)%3C/text%3E%3C/svg%3E");
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: 1;
-}
+
 .home-content {
   position: relative;
   z-index: 2;
   text-align: center;
-  margin-top: -80px;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 0;
 }
+
+.home-content h1 {
+  font-size: 3.2rem;
+  margin: 0 0 20px 0;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
 .home-desc {
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   color: #cfd8dc;
-  margin-top: 18px;
+  margin-top: 12px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.5;
+  max-width: 600px;
 }
