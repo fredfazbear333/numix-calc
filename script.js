@@ -1,719 +1,744 @@
-// Mode Switching
+// --- Mode Switching ---
 function showMode(mode) {
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.mode-content').forEach(c => c.style.display = 'none');
-  document.getElementById(mode).style.display = 'block';
-  document.querySelector(`.mode-btn[data-mode="${mode}"]`)?.classList.add('active');
+  document.querySelectorAll('.mode-content').forEach(el => el.style.display = 'none');
+  document.getElementById(mode).style.display = (mode === 'home') ? 'flex' : 'block';
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  let idx = ['home','algebra','geometry','ai'].indexOf(mode);
+  if(idx>=0) document.querySelectorAll('.mode-btn')[idx].classList.add('active');
+  if (mode === 'algebra') showAlgebra('simple');
+  if (mode === 'geometry') showGeometry('circle');
 }
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => showMode(btn.dataset.mode));
-});
-document.getElementById('logo-link').onclick = () => showMode('home');
 
-// Algebra Calculators
-const algebraCalculators = {
-    basic: `
-        <h3>Basic Calculator</h3>
-        <input type="text" id="basic-display" readonly>
-        <div id="basic-buttons" class="calculator-grid"></div>
-        <div id="basic-answer"></div>
-    `,
-    scientific: `
-        <h3>Scientific Calculator</h3>
+// --- Algebra Calculators ---
+const algebraMain = document.getElementById('algebra-main');
+function showAlgebra(which) {
+  algebraMain.innerHTML = '';
+  document.querySelectorAll('#algebra-tools .tool-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`#algebra-tools .tool-item[onclick*="${which}"]`).classList.add('active');
+  switch (which) {
+    case 'simple':
+      algebraMain.innerHTML = `
+        <h2>Simple Calculator</h2>
+        <input type="text" id="simple-display" readonly>
+        <div class="calculator-grid simple-grid">
+          <button class="simple-btn clear-btn" data-val="C">C</button>
+          <button class="simple-btn" data-val="+/-">±</button>
+          <button class="simple-btn" data-val="%">%</button>
+          <button class="simple-btn" data-val="/">÷</button>
+          <button class="simple-btn" data-val="7">7</button>
+          <button class="simple-btn" data-val="8">8</button>
+          <button class="simple-btn" data-val="9">9</button>
+          <button class="simple-btn" data-val="*">×</button>
+          <button class="simple-btn" data-val="4">4</button>
+          <button class="simple-btn" data-val="5">5</button>
+          <button class="simple-btn" data-val="6">6</button>
+          <button class="simple-btn" data-val="-">−</button>
+          <button class="simple-btn" data-val="1">1</button>
+          <button class="simple-btn" data-val="2">2</button>
+          <button class="simple-btn" data-val="3">3</button>
+          <button class="simple-btn" data-val="+">+</button>
+          <button class="simple-btn zero-btn" data-val="0">0</button>
+          <button class="simple-btn" data-val=".">.</button>
+          <button class="simple-btn" data-val="=">=</button>
+        </div>
+      `;
+      simpleCalculatorInit();
+      break;
+
+    case 'scientific':
+      algebraMain.innerHTML = `
+        <h2>Scientific Calculator</h2>
         <input type="text" id="sci-display" readonly>
-        <div id="sci-buttons" class="calculator-grid" style="grid-template-columns:repeat(5,64px);"></div>
-        <div id="sci-answer"></div>
-    `,
-    quadratic: `
-        <h3>Quadratic Equation Solver</h3>
-        <form id="quad-form">
-            <label>a: <input type="number" id="quad-a" required></label>
-            <label>b: <input type="number" id="quad-b" required></label>
-            <label>c: <input type="number" id="quad-c" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="quad-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="quad-result"></div>
-    `,
-    linear: `
-        <h3>Linear Equation Solver (ax + b = 0)</h3>
-        <form id="linear-form">
-            <label>a: <input type="number" id="linear-a" required></label>
-            <label>b: <input type="number" id="linear-b" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="linear-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="linear-result"></div>
-    `,
-    inequality: `
-        <h3>Inequality Solver</h3>
-        <form id="ineq-form">
-            <label>Enter inequality (e.g., 2*x-5 < 9): <input type="text" id="ineq-input" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="ineq-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="ineq-result"></div>
-    `,
-    system: `
-        <h3>System of Equations (2x2)</h3>
-        <form id="system-form">
-            <label>Eq1: <input type="text" id="sys-eq1" placeholder="e.g. 2*x+3*y=8" required></label>
-            <label>Eq2: <input type="text" id="sys-eq2" placeholder="e.g. x-2*y=3" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="system-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="system-result"></div>
-    `,
-    simplify: `
-        <h3>Expression Simplifier</h3>
-        <form id="simplify-form">
-            <label>Expression: <input type="text" id="simplify-input" placeholder="e.g. (x+1)*(x+2)" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="simplify-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="simplify-result"></div>
-    `,
-    factor: `
-        <h3>Factor Polynomial</h3>
-        <form id="factor-form">
-            <label>Polynomial: <input type="text" id="factor-input" placeholder="e.g. x^2-5*x+6" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="factor-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="factor-result"></div>
-    `
-};
+        <div class="calculator-grid sci-grid">
+          <button class="sci-btn clear-btn" data-func="C">C</button>
+          <button class="sci-btn" data-func="+/-">±</button>
+          <button class="sci-btn" data-func="%">%</button>
+          <button class="sci-btn" data-func="/">÷</button>
+          <button class="sci-btn" data-func="sin">sin</button>
+          <button class="sci-btn" data-func="cos">cos</button>
+          <button class="sci-btn" data-func="tan">tan</button>
+          <button class="sci-btn" data-func="*">×</button>
+          <button class="sci-btn" data-func="7">7</button>
+          <button class="sci-btn" data-func="8">8</button>
+          <button class="sci-btn" data-func="9">9</button>
+          <button class="sci-btn" data-func="-">−</button>
+          <button class="sci-btn" data-func="4">4</button>
+          <button class="sci-btn" data-func="5">5</button>
+          <button class="sci-btn" data-func="6">6</button>
+          <button class="sci-btn" data-func="+">+</button>
+          <button class="sci-btn" data-func="1">1</button>
+          <button class="sci-btn" data-func="2">2</button>
+          <button class="sci-btn" data-func="3">3</button>
+          <button class="sci-btn" data-func="=">=</button>
+          <button class="sci-btn zero-btn" data-func="0">0</button>
+          <button class="sci-btn" data-func=".">.</button>
+          <button class="sci-btn" data-func="pi">π</button>
+          <button class="sci-btn" data-func="e">e</button>
+          <button class="sci-btn" data-func="^">xʸ</button>
+          <button class="sci-btn" data-func="sqrt">√</button>
+          <button class="sci-btn" data-func="ln">ln</button>
+          <button class="sci-btn" data-func="log">log</button>
+        </div>
+      `;
+      scientificCalculatorInit();
+      break;
 
-// Geometry Calculators
-const geometryCalculators = {
-    pythagorean: `
-        <h3>Pythagorean Theorem</h3>
-        <form id="pythag-form">
-            <label>a: <input type="number" id="pythag-a" required></label>
-            <label>b: <input type="number" id="pythag-b" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="pythag-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+    case 'linear':
+      algebraMain.innerHTML = `
+        <h2>Linear Equation Solver (ax + b = 0)</h2>
+        <form onsubmit="event.preventDefault(); solveLinear();">
+          <label>a: <input type="number" id="lin-a" required></label>
+          <label>b: <input type="number" id="lin-b" required></label>
+          <button type="submit">Solve</button>
         </form>
-        <div id="pythag-result"></div>
-    `,
-    "circle-area": `
-        <h3>Circle Area & Circumference</h3>
-        <form id="circle-form">
-            <label>Radius: <input type="number" id="circle-radius" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="circle-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="lin-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'quadratic':
+      algebraMain.innerHTML = `
+        <h2>Quadratic Equation Solver</h2>
+        <form onsubmit="event.preventDefault(); solveQuadratic();">
+          <label>a: <input type="number" id="quad-a" required></label>
+          <label>b: <input type="number" id="quad-b" required></label>
+          <label>c: <input type="number" id="quad-c" required></label>
+          <button type="submit">Solve</button>
         </form>
-        <div id="circle-result"></div>
-    `,
-    "triangle-area": `
-        <h3>Triangle Area</h3>
-        <form id="triangle-form">
-            <label>Base: <input type="number" id="tri-base" required></label>
-            <label>Height: <input type="number" id="tri-height" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="triangle-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="quad-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'fraction':
+      algebraMain.innerHTML = `
+        <h2>Fraction Simplifier</h2>
+        <form onsubmit="event.preventDefault(); simplifyFraction();">
+          <label>Numerator: <input type="number" id="frac-num" required></label>
+          <label>Denominator: <input type="number" id="frac-den" required></label>
+          <button type="submit">Simplify</button>
         </form>
-        <div id="tri-result"></div>
-    `,
-    rectangle: `
-        <h3>Rectangle Area & Perimeter</h3>
-        <form id="rect-form">
-            <label>Length: <input type="number" id="rect-l" required></label>
-            <label>Width: <input type="number" id="rect-w" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="rect-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="frac-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'system':
+      algebraMain.innerHTML = `
+        <h2>System of Equations Solver (2x2)</h2>
+        <form onsubmit="event.preventDefault(); solveSystem();">
+          <label>a₁: <input type="number" id="sys-a1" required></label>
+          <label>b₁: <input type="number" id="sys-b1" required></label>
+          <label>c₁: <input type="number" id="sys-c1" required></label>
+          <label>a₂: <input type="number" id="sys-a2" required></label>
+          <label>b₂: <input type="number" id="sys-b2" required></label>
+          <label>c₂: <input type="number" id="sys-c2" required></label>
+          <button type="submit">Solve</button>
         </form>
-        <div id="rect-result"></div>
-    `,
-    square: `
-        <h3>Square Area & Perimeter</h3>
-        <form id="square-form">
-            <label>Side: <input type="number" id="square-s" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="square-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="sys-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'polynomial':
+      algebraMain.innerHTML = `
+        <h2>Cubic Polynomial Solver (ax³ + bx² + cx + d = 0)</h2>
+        <form onsubmit="event.preventDefault(); solveCubic();">
+          <label>a: <input type="number" id="cubic-a" required></label>
+          <label>b: <input type="number" id="cubic-b" required></label>
+          <label>c: <input type="number" id="cubic-c" required></label>
+          <label>d: <input type="number" id="cubic-d" required></label>
+          <button type="submit">Solve</button>
         </form>
-        <div id="square-result"></div>
-    `,
-    trapezoid: `
-        <h3>Trapezoid Area</h3>
-        <form id="trap-form">
-            <label>Base 1: <input type="number" id="trap-b1" required></label>
-            <label>Base 2: <input type="number" id="trap-b2" required></label>
-            <label>Height: <input type="number" id="trap-h" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="trap-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="cubic-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'rational':
+      algebraMain.innerHTML = `
+        <h2>Rational Expression Simplifier</h2>
+        <form onsubmit="event.preventDefault(); simplifyRational();">
+          <label>Numerator: <input type="text" id="rat-num" required placeholder="e.g. 2x^2+4x"></label>
+          <label>Denominator: <input type="text" id="rat-den" required placeholder="e.g. 2x"></label>
+          <button type="submit">Simplify</button>
         </form>
-        <div id="trap-result"></div>
-    `,
-    ellipse: `
-        <h3>Ellipse Area</h3>
-        <form id="ellipse-form">
-            <label>Semi-major axis (a): <input type="number" id="ellipse-a" required></label>
-            <label>Semi-minor axis (b): <input type="number" id="ellipse-b" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="ellipse-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="rat-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'exproot':
+      algebraMain.innerHTML = `
+        <h2>Exponent/Root Calculator</h2>
+        <form onsubmit="event.preventDefault(); calcExpRoot();">
+          <label>Base: <input type="number" id="exproot-base" required></label>
+          <label>Exponent (for root use 1/n): <input type="number" id="exproot-exp" required></label>
+          <button type="submit">Calculate</button>
         </form>
-        <div id="ellipse-result"></div>
-    `,
-    cube: `
-        <h3>Cube Volume</h3>
-        <form id="cube-form">
-            <label>Side: <input type="number" id="cube-s" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="cube-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="exproot-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'sci-notation':
+      algebraMain.innerHTML = `
+        <h2>Scientific Notation Converter</h2>
+        <form onsubmit="event.preventDefault(); sciNotation();">
+          <label>Number: <input type="number" id="sci-num" required></label>
+          <button type="submit">Convert</button>
         </form>
-        <div id="cube-result"></div>
-    `,
-    sphere: `
-        <h3>Sphere Volume</h3>
-        <form id="sphere-form">
-            <label>Radius: <input type="number" id="sphere-r" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="sphere-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
+        <div id="sci-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'sequence':
+      algebraMain.innerHTML = `
+        <h2>Sequence Calculator</h2>
+        <form onsubmit="event.preventDefault(); sequenceCalc();">
+          <label>Type:
+            <select id="seq-type">
+              <option value="arith">Arithmetic</option>
+              <option value="geom">Geometric</option>
+            </select>
+          </label>
+          <label>First Term (a₁): <input type="number" id="seq-a1" required></label>
+          <label>Common Difference/Ratio (d/r): <input type="number" id="seq-dr" required></label>
+          <label>n-th Term (n): <input type="number" id="seq-n" required></label>
+          <button type="submit">Calculate</button>
         </form>
-        <div id="sphere-result"></div>
-    `,
-    cylinder: `
-        <h3>Cylinder Volume</h3>
-        <form id="cylinder-form">
-            <label>Radius: <input type="number" id="cylinder-r" required></label>
-            <label>Height: <input type="number" id="cylinder-h" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="cylinder-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="cylinder-result"></div>
-    `,
-    cone: `
-        <h3>Cone Volume</h3>
-        <form id="cone-form">
-            <label>Radius: <input type="number" id="cone-r" required></label>
-            <label>Height: <input type="number" id="cone-h" required></label>
-            <div class="form-btn-row">
-                <button type="submit" class="calc-btn">Solve</button>
-                <button type="button" id="cone-clear" class="calc-btn clear-btn">Clear</button>
-            </div>
-        </form>
-        <div id="cone-result"></div>
-    `
-};
-
-// Helper: Render calculator
-function renderCalculator(containerId, calculators, tool) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = calculators[tool] || '';
-    if (tool === 'basic') setupBasicCalculator();
-    if (tool === 'scientific') setupScientificCalculator();
-    if (tool === 'quadratic') setupQuadratic();
-    if (tool === 'linear') setupLinear();
-    if (tool === 'inequality') setupInequality();
-    if (tool === 'system') setupSystem();
-    if (tool === 'simplify') setupSimplify();
-    if (tool === 'factor') setupFactor();
-    if (tool === 'pythagorean') setupPythagorean();
-    if (tool === 'circle-area') setupCircle();
-    if (tool === 'triangle-area') setupTriangle();
-    if (tool === 'rectangle') setupRectangle();
-    if (tool === 'square') setupSquare();
-    if (tool === 'trapezoid') setupTrapezoid();
-    if (tool === 'ellipse') setupEllipse();
-    if (tool === 'cube') setupCube();
-    if (tool === 'sphere') setupSphere();
-    if (tool === 'cylinder') setupCylinder();
-    if (tool === 'cone') setupCone();
-    // Sidebar highlight
-    const sidebar = containerId === 'algebra-main' ? 'algebra-tools' : 'geometry-tools';
-    document.querySelectorAll(`#${sidebar} .tool-item`).forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.tool === tool) item.classList.add('active');
-    });
+        <div id="seq-result" class="animated-answer"></div>
+      `;
+      break;
+  }
 }
 
-// Sidebar events
-document.getElementById('algebra-tools').addEventListener('click', (e) => {
-    if (e.target.classList.contains('tool-item')) {
-        renderCalculator('algebra-main', algebraCalculators, e.target.dataset.tool);
-    }
-});
-document.getElementById('geometry-tools').addEventListener('click', (e) => {
-    if (e.target.classList.contains('tool-item')) {
-        renderCalculator('geometry-main', geometryCalculators, e.target.dataset.tool);
-    }
-});
-
-// Default calculators
-renderCalculator('algebra-main', algebraCalculators, 'basic');
-renderCalculator('geometry-main', geometryCalculators, 'pythagorean');
-
-// Basic Calculator Logic with Clear
-function setupBasicCalculator() {
-    const display = document.getElementById('basic-display');
-    const answerDiv = document.getElementById('basic-answer');
-    const buttons = [
-        '7','8','9','/',
-        '4','5','6','*',
-        '1','2','3','-',
-        '0','.','=','+',
-        'C'
-    ];
-    const btnsDiv = document.getElementById('basic-buttons');
-    btnsDiv.innerHTML = '';
-    let current = '';
-    buttons.forEach(b => {
-        const btn = document.createElement('button');
-        btn.textContent = b;
-        btn.className = 'calc-btn' + (b === 'C' ? ' clear-btn' : '');
-        btn.type = 'button';
-        btn.onclick = () => {
-            if (b === 'C') {
-                current = '';
-                display.value = '';
-                answerDiv.innerHTML = '';
-            } else if (b === '=') {
-                let result;
-                try {
-                    result = eval(current).toString();
-                } catch {
-                    result = 'Error';
-                }
-                animateAnswer(answerDiv, result);
-                current = result === 'Error' ? '' : result;
-            } else {
-                current += b;
-                answerDiv.innerHTML = '';
-            }
-            display.value = current;
-        };
-        btnsDiv.appendChild(btn);
-    });
+// --- Geometry Calculators ---
+const geometryMain = document.getElementById('geometry-main');
+function showGeometry(which) {
+  geometryMain.innerHTML = '';
+  document.querySelectorAll('#geometry-tools .tool-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`#geometry-tools .tool-item[onclick*="${which}"]`).classList.add('active');
+  switch (which) {
+    case 'circle':
+      geometryMain.innerHTML = `
+        <h2>Circle</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterCircle();">
+          <label>Radius: <input type="number" id="circle-radius" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="circle-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'rectangle':
+      geometryMain.innerHTML = `
+        <h2>Rectangle</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterRectangle();">
+          <label>Length: <input type="number" id="rect-l" min="0" step="any" required></label>
+          <label>Width: <input type="number" id="rect-w" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="rect-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'square':
+      geometryMain.innerHTML = `
+        <h2>Square</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterSquare();">
+          <label>Side: <input type="number" id="sq-side" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="sq-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'parallelogram':
+      geometryMain.innerHTML = `
+        <h2>Parallelogram</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterParallelogram();">
+          <label>Base: <input type="number" id="par-base" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="par-height" min="0" step="any" required></label>
+          <label>Side: <input type="number" id="par-side" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="par-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'trapezoid':
+      geometryMain.innerHTML = `
+        <h2>Trapezoid</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterTrapezoid();">
+          <label>Base 1: <input type="number" id="trap-b1" min="0" step="any" required></label>
+          <label>Base 2: <input type="number" id="trap-b2" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="trap-h" min="0" step="any" required></label>
+          <label>Side 1: <input type="number" id="trap-s1" min="0" step="any" required></label>
+          <label>Side 2: <input type="number" id="trap-s2" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="trap-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'ellipse':
+      geometryMain.innerHTML = `
+        <h2>Ellipse</h2>
+        <form onsubmit="event.preventDefault(); areaPerimeterEllipse();">
+          <label>Semi-major axis (a): <input type="number" id="ell-a" min="0" step="any" required></label>
+          <label>Semi-minor axis (b): <input type="number" id="ell-b" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="ell-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'sphere':
+      geometryMain.innerHTML = `
+        <h2>Sphere (Volume)</h2>
+        <form onsubmit="event.preventDefault(); volumeSphere();">
+          <label>Radius: <input type="number" id="sp-radius" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="sp-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'cylinder':
+      geometryMain.innerHTML = `
+        <h2>Cylinder (Volume)</h2>
+        <form onsubmit="event.preventDefault(); volumeCylinder();">
+          <label>Radius: <input type="number" id="cyl-radius" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="cyl-h" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="cyl-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'cone':
+      geometryMain.innerHTML = `
+        <h2>Cone (Volume)</h2>
+        <form onsubmit="event.preventDefault(); volumeCone();">
+          <label>Radius: <input type="number" id="cone-radius" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="cone-h" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="cone-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'prism':
+      geometryMain.innerHTML = `
+        <h2>Rectangular Prism (Volume)</h2>
+        <form onsubmit="event.preventDefault(); volumePrism();">
+          <label>Length: <input type="number" id="prism-l" min="0" step="any" required></label>
+          <label>Width: <input type="number" id="prism-w" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="prism-h" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="prism-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'distance':
+      geometryMain.innerHTML = `
+        <h2>Distance Between Two Points</h2>
+        <form onsubmit="event.preventDefault(); distance2Points();">
+          <label>x₁: <input type="number" id="dist-x1" required></label>
+          <label>y₁: <input type="number" id="dist-y1" required></label>
+          <label>x₂: <input type="number" id="dist-x2" required></label>
+          <label>y₂: <input type="number" id="dist-y2" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="dist-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'midpoint':
+      geometryMain.innerHTML = `
+        <h2>Midpoint Calculator</h2>
+        <form onsubmit="event.preventDefault(); midpointCalc();">
+          <label>x₁: <input type="number" id="mid-x1" required></label>
+          <label>y₁: <input type="number" id="mid-y1" required></label>
+          <label>x₂: <input type="number" id="mid-x2" required></label>
+          <label>y₂: <input type="number" id="mid-y2" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="mid-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'slope':
+      geometryMain.innerHTML = `
+        <h2>Slope Calculator</h2>
+        <form onsubmit="event.preventDefault(); slopeCalc();">
+          <label>x₁: <input type="number" id="slope-x1" required></label>
+          <label>y₁: <input type="number" id="slope-y1" required></label>
+          <label>x₂: <input type="number" id="slope-x2" required></label>
+          <label>y₂: <input type="number" id="slope-y2" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="slope-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'triangle':
+      geometryMain.innerHTML = `
+        <h2>Triangle (Area)</h2>
+        <form onsubmit="event.preventDefault(); areaTriangle();">
+          <label>Base: <input type="number" id="tri-base" min="0" step="any" required></label>
+          <label>Height: <input type="number" id="tri-height" min="0" step="any" required></label>
+          <button type="submit">Calculate</button>
+        </form>
+        <div id="triangle-result" class="animated-answer"></div>
+      `;
+      break;
+    case 'pythagorean':
+      geometryMain.innerHTML = `
+        <h2>Pythagorean Theorem</h2>
+        <form onsubmit="event.preventDefault(); pythagorean();">
+          <label>a: <input type="number" id="pyth-a" min="0" step="any" required></label>
+          <label>b: <input type="number" id="pyth-b" min="0" step="any" required></label>
+          <button type="submit">Calculate c</button>
+        </form>
+        <div id="pyth-result" class="animated-answer"></div>
+      `;
+      break;
+  }
 }
 
-// Scientific Calculator Logic with Clear
-function setupScientificCalculator() {
-    const display = document.getElementById('sci-display');
-    const answerDiv = document.getElementById('sci-answer');
-    const buttons = [
-        '7','8','9','/','sin',
-        '4','5','6','*','cos',
-        '1','2','3','-','tan',
-        '0','.','=','+','^',
-        'C'
-    ];
-    const btnsDiv = document.getElementById('sci-buttons');
-    btnsDiv.innerHTML = '';
-    let current = '';
-    buttons.forEach(b => {
-        const btn = document.createElement('button');
-        btn.textContent = b;
-        btn.className = 'calc-btn' + (b === 'C' ? ' clear-btn' : '');
-        btn.type = 'button';
-        btn.onclick = () => {
-            if (b === 'C') {
-                current = '';
-                display.value = '';
-                answerDiv.innerHTML = '';
-            } else if (b === '=') {
-                let result;
-                try {
-                    let expr = current.replace(/\^/g, '**');
-                    expr = expr.replace(/sin\(([^)]+)\)/g, (_, x) => Math.sin(Number(x)));
-                    expr = expr.replace(/cos\(([^)]+)\)/g, (_, x) => Math.cos(Number(x)));
-                    expr = expr.replace(/tan\(([^)]+)\)/g, (_, x) => Math.tan(Number(x)));
-                    result = eval(expr).toString();
-                } catch {
-                    result = 'Error';
-                }
-                animateAnswer(answerDiv, result);
-                current = result === 'Error' ? '' : result;
-            } else if(['sin','cos','tan'].includes(b)) {
-                current += b + '(';
-                answerDiv.innerHTML = '';
-            } else {
-                current += b;
-                answerDiv.innerHTML = '';
-            }
-            display.value = current;
-        };
-        btnsDiv.appendChild(btn);
-    });
-}
-
-// Quadratic Equation Solver with Clear
-function setupQuadratic() {
-    document.getElementById('quad-form').onsubmit = function(e) {
-        e.preventDefault();
-        const a = parseFloat(document.getElementById('quad-a').value);
-        const b = parseFloat(document.getElementById('quad-b').value);
-        const c = parseFloat(document.getElementById('quad-c').value);
-        const delta = b*b - 4*a*c;
-        let result;
-        if (delta < 0) result = 'No real roots';
-        else if (delta === 0) result = `One root: x = ${-b/(2*a)}`;
-        else result = `Roots: x₁ = ${(-b + Math.sqrt(delta))/(2*a)}, x₂ = ${(-b - Math.sqrt(delta))/(2*a)}`;
-        animateAnswer(document.getElementById('quad-result'), result);
+// --- Simple Calculator Logic (Apple-style) ---
+function simpleCalculatorInit() {
+  let simpleExpr = '';
+  const simpleDisplay = document.getElementById('simple-display');
+  document.querySelectorAll('.simple-btn').forEach(btn => {
+    btn.onclick = function() {
+      let val = this.getAttribute('data-val');
+      if (val === 'C') {
+        simpleExpr = '';
+      } else if (val === '=') {
+        try {
+          simpleExpr = eval(simpleExpr).toString();
+        } catch {
+          simpleExpr = 'Error';
+        }
+      } else if (val === '+/-') {
+        if (simpleExpr) {
+          if (simpleExpr.startsWith('-')) {
+            simpleExpr = simpleExpr.substring(1);
+          } else {
+            simpleExpr = '-' + simpleExpr;
+          }
+        }
+      } else if (val === '%') {
+        if (simpleExpr) {
+          simpleExpr = (parseFloat(simpleExpr) / 100).toString();
+        }
+      } else {
+        simpleExpr += val;
+      }
+      simpleDisplay.value = simpleExpr;
     };
-    document.getElementById('quad-clear').onclick = function() {
-        document.getElementById('quad-form').reset();
-        document.getElementById('quad-result').innerHTML = '';
-    };
+  });
 }
 
-// Linear Equation Solver with Clear
-function setupLinear() {
-    document.getElementById('linear-form').onsubmit = function(e) {
-        e.preventDefault();
-        const a = parseFloat(document.getElementById('linear-a').value);
-        const b = parseFloat(document.getElementById('linear-b').value);
-        let result;
-        if (a === 0) {
-            result = 'No solution (a cannot be zero)';
+// --- Scientific Calculator Logic (Apple-style) ---
+function scientificCalculatorInit() {
+  let sciExpr = '';
+  const sciDisplay = document.getElementById('sci-display');
+  function insertSci(val) {
+    if (/^[0-9.]$/.test(val)) {
+      sciExpr += val;
+    } else if (val === '+' || val === '-' || val === '*' || val === '/' || val === '^') {
+      sciExpr += ' ' + val + ' ';
+    } else if (val === 'pi') {
+      sciExpr += 'π';
+    } else if (val === 'e') {
+      sciExpr += 'e';
+    } else if (val === 'C') {
+      sciExpr = '';
+    } else if (val === '=') {
+      try {
+        let result = evaluateSci(sciExpr);
+        sciExpr = result.toString();
+      } catch (e) {
+        sciExpr = '';
+        sciDisplay.value = 'Error';
+        return;
+      }
+    } else if (val === 'sin' || val === 'cos' || val === 'tan' || val === 'ln' || val === 'log' || val === 'sqrt') {
+      sciExpr += val + '(';
+    } else if (val === '+/-') {
+      if (sciExpr) {
+        if (sciExpr.startsWith('-')) {
+          sciExpr = sciExpr.substring(1);
         } else {
-            result = `x = ${-b/a}`;
+          sciExpr = '-' + sciExpr;
         }
-        animateAnswer(document.getElementById('linear-result'), result);
+      }
+    } else if (val === '%') {
+      if (sciExpr) {
+        sciExpr = (parseFloat(sciExpr) / 100).toString();
+      }
+    } else {
+      sciExpr += val;
+    }
+    sciDisplay.value = sciExpr;
+  }
+  function evaluateSci(expr) {
+    expr = expr.replace(/π/g, 'Math.PI').replace(/e/g, 'Math.E');
+    expr = expr.replace(/sin\(/g, 'Math.sin(')
+               .replace(/cos\(/g, 'Math.cos(')
+               .replace(/tan\(/g, 'Math.tan(')
+               .replace(/ln\(/g, 'Math.log(')
+               .replace(/log\(/g, 'Math.log10(')
+               .replace(/sqrt\(/g, 'Math.sqrt(');
+    expr = expr.replace(/([0-9.eE\)\]]+)\s*\^\s*([0-9.eE\(\[]+)/g, 'Math.pow($1,$2)');
+    return Function('return ' + expr)();
+  }
+  document.querySelectorAll('.sci-btn').forEach(btn => {
+    btn.onclick = function() {
+      insertSci(this.getAttribute('data-func'));
     };
-    document.getElementById('linear-clear').onclick = function() {
-        document.getElementById('linear-form').reset();
-        document.getElementById('linear-result').innerHTML = '';
-    };
+  });
 }
 
-// Inequality Solver (using math.js)
-function setupInequality() {
-    document.getElementById('ineq-form').onsubmit = function(e) {
-        e.preventDefault();
-        const ineq = document.getElementById('ineq-input').value;
-        let result = "";
-        try {
-            // Only handles simple inequalities with one variable, e.g., "2*x-5 < 9"
-            // We'll solve for x numerically
-            const match = ineq.match(/(.+?)(<=|>=|<|>)(.+)/);
-            if (match) {
-                const left = match[1].trim();
-                const op = match[2];
-                const right = match[3].trim();
-                // Rearrange to left - right < 0, then solve
-                const expr = `(${left}) - (${right})`;
-                // Try to find the root numerically
-                let x = 0, found = false;
-                for (let i = -1000; i <= 1000; i += 0.01) {
-                    const scope = {x: i};
-                    const val = math.evaluate(expr, scope);
-                    if (
-                        (op === "<" && val < 0) ||
-                        (op === ">" && val > 0) ||
-                        (op === "<=" && val <= 0) ||
-                        (op === ">=" && val >= 0)
-                    ) {
-                        result = `x ${op} ${i.toFixed(2)}`;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) result = "No solution found (demo: only works for simple inequalities)";
-            } else {
-                result = "Please enter a simple inequality like '2*x-5 < 9'";
-            }
-        } catch (err) {
-            result = "Error: " + err.message;
-        }
-        animateAnswer(document.getElementById('ineq-result'), result);
-    };
-    document.getElementById('ineq-clear').onclick = function() {
-        document.getElementById('ineq-form').reset();
-        document.getElementById('ineq-result').innerHTML = '';
-    };
+// --- All Calculation Functions (Algebra & Geometry) ---
+function solveLinear() {
+  let a = parseFloat(document.getElementById('lin-a').value);
+  let b = parseFloat(document.getElementById('lin-b').value);
+  let result = '';
+  if (a === 0) {
+    result = (b === 0) ? "Infinite solutions." : "No solution.";
+  } else {
+    result = `x = ${-b / a}`;
+  }
+  document.getElementById('lin-result').textContent = result;
+}
+function solveQuadratic() {
+  let a = parseFloat(document.getElementById('quad-a').value);
+  let b = parseFloat(document.getElementById('quad-b').value);
+  let c = parseFloat(document.getElementById('quad-c').value);
+  let d = b * b - 4 * a * c;
+  let result = '';
+  if (a === 0) {
+    result = "Not a quadratic equation.";
+  } else if (d > 0) {
+    let r1 = (-b + Math.sqrt(d)) / (2 * a);
+    let r2 = (-b - Math.sqrt(d)) / (2 * a);
+    result = `Two real roots: x₁ = ${r1}, x₂ = ${r2}`;
+  } else if (d === 0) {
+    let r = -b / (2 * a);
+    result = `One real root: x = ${r}`;
+  } else {
+    let real = (-b / (2 * a)).toFixed(3);
+    let imag = (Math.sqrt(-d) / (2 * a)).toFixed(3);
+    result = `Two complex roots: x₁ = ${real} + ${imag}i, x₂ = ${real} - ${imag}i`;
+  }
+  document.getElementById('quad-result').textContent = result;
+}
+function simplifyFraction() {
+  let num = parseInt(document.getElementById('frac-num').value);
+  let den = parseInt(document.getElementById('frac-den').value);
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+  let g = gcd(Math.abs(num), Math.abs(den));
+  let simpNum = num / g;
+  let simpDen = den / g;
+  let result = (simpDen === 1) ? `${simpNum}` : `${simpNum}/${simpDen}`;
+  document.getElementById('frac-result').textContent = result;
+}
+function solveSystem() {
+  let a1 = parseFloat(document.getElementById('sys-a1').value);
+  let b1 = parseFloat(document.getElementById('sys-b1').value);
+  let c1 = parseFloat(document.getElementById('sys-c1').value);
+  let a2 = parseFloat(document.getElementById('sys-a2').value);
+  let b2 = parseFloat(document.getElementById('sys-b2').value);
+  let c2 = parseFloat(document.getElementById('sys-c2').value);
+  let det = a1 * b2 - a2 * b1;
+  let result = '';
+  if (det === 0) {
+    result = "No unique solution.";
+  } else {
+    let x = (c1 * b2 - c2 * b1) / det;
+    let y = (a1 * c2 - a2 * c1) / det;
+    result = `x = ${x}, y = ${y}`;
+  }
+  document.getElementById('sys-result').textContent = result;
+}
+function solveCubic() {
+  let a = parseFloat(document.getElementById('cubic-a').value);
+  let b = parseFloat(document.getElementById('cubic-b').value);
+  let c = parseFloat(document.getElementById('cubic-c').value);
+  let d = parseFloat(document.getElementById('cubic-d').value);
+  let result = '';
+  if (a === 0) {
+    result = "Not a cubic equation.";
+  } else {
+    let p = (3*a*c - b*b) / (3*a*a);
+    let q = (2*b*b*b - 9*a*b*c + 27*a*a*d) / (27*a*a*a);
+    let discriminant = (q*q/4) + (p*p*p/27);
+    let roots = [];
+    if (discriminant > 0) {
+      let u = Math.cbrt(-q/2 + Math.sqrt(discriminant));
+      let v = Math.cbrt(-q/2 - Math.sqrt(discriminant));
+      roots[0] = u + v - b/(3*a);
+      result = `One real root: x = ${roots[0]}`;
+    } else if (discriminant === 0) {
+      let u = Math.cbrt(-q/2);
+      roots[0] = 2*u - b/(3*a);
+      roots[1] = -u - b/(3*a);
+      result = `Multiple real roots: x₁ = ${roots[0]}, x₂ = x₃ = ${roots[1]}`;
+    } else {
+      let r = Math.sqrt(-p*p*p/27);
+      let phi = Math.acos(-q/(2*r));
+      let t = 2*Math.cbrt(r);
+      roots[0] = t*Math.cos(phi/3) - b/(3*a);
+      roots[1] = t*Math.cos((phi+2*Math.PI)/3) - b/(3*a);
+      roots[2] = t*Math.cos((phi+4*Math.PI)/3) - b/(3*a);
+      result = `Three real roots: x₁ = ${roots[0]}, x₂ = ${roots[1]}, x₃ = ${roots[2]}`;
+    }
+  }
+  document.getElementById('cubic-result').textContent = result;
+}
+function simplifyRational() {
+  let num = document.getElementById('rat-num').value.replace(/\s/g,'');
+  let den = document.getElementById('rat-den').value.replace(/\s/g,'');
+  let numVal = eval(num.replace(/x/g, '1'));
+  let denVal = eval(den.replace(/x/g, '1'));
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+  let g = gcd(Math.abs(numVal), Math.abs(denVal));
+  let simpNum = numVal / g;
+  let simpDen = denVal / g;
+  let result = (simpDen === 1) ? `${simpNum}` : `${simpNum}/${simpDen}`;
+  document.getElementById('rat-result').textContent = "Numeric simplification: " + result;
+}
+function calcExpRoot() {
+  let base = parseFloat(document.getElementById('exproot-base').value);
+  let exp = parseFloat(document.getElementById('exproot-exp').value);
+  let result = Math.pow(base, exp);
+  document.getElementById('exproot-result').textContent = `Result: ${result}`;
+}
+function sciNotation() {
+  let num = parseFloat(document.getElementById('sci-num').value);
+  let sci = num.toExponential();
+  document.getElementById('sci-result').textContent = `Scientific notation: ${sci}`;
+}
+function sequenceCalc() {
+  let type = document.getElementById('seq-type').value;
+  let a1 = parseFloat(document.getElementById('seq-a1').value);
+  let dr = parseFloat(document.getElementById('seq-dr').value);
+  let n = parseInt(document.getElementById('seq-n').value);
+  let nth, sum;
+  if (type === 'arith') {
+    nth = a1 + (n-1)*dr;
+    sum = (n/2)*(2*a1 + (n-1)*dr);
+    document.getElementById('seq-result').textContent = `aₙ = ${nth}, Sₙ = ${sum}`;
+  } else {
+    nth = a1 * Math.pow(dr, n-1);
+    sum = a1 * (1 - Math.pow(dr, n)) / (1-dr);
+    document.getElementById('seq-result').textContent = `aₙ = ${nth}, Sₙ = ${sum}`;
+  }
+}
+function areaPerimeterCircle() {
+  let r = parseFloat(document.getElementById('circle-radius').value);
+  let area = Math.PI * r * r;
+  let peri = 2 * Math.PI * r;
+  document.getElementById('circle-result').textContent = `Area = ${area}, Perimeter = ${peri}`;
+}
+function areaPerimeterRectangle() {
+  let l = parseFloat(document.getElementById('rect-l').value);
+  let w = parseFloat(document.getElementById('rect-w').value);
+  let area = l * w;
+  let peri = 2 * (l + w);
+  document.getElementById('rect-result').textContent = `Area = ${area}, Perimeter = ${peri}`;
+}
+function areaPerimeterSquare() {
+  let s = parseFloat(document.getElementById('sq-side').value);
+  let area = s * s;
+  let peri = 4 * s;
+  document.getElementById('sq-result').textContent = `Area = ${area}, Perimeter = ${peri}`;
+}
+function areaPerimeterParallelogram() {
+  let b = parseFloat(document.getElementById('par-base').value);
+  let h = parseFloat(document.getElementById('par-height').value);
+  let s = parseFloat(document.getElementById('par-side').value);
+  let area = b * h;
+  let peri = 2 * (b + s);
+  document.getElementById('par-result').textContent = `Area = ${area}, Perimeter = ${peri}`;
+}
+function areaPerimeterTrapezoid() {
+  let b1 = parseFloat(document.getElementById('trap-b1').value);
+  let b2 = parseFloat(document.getElementById('trap-b2').value);
+  let h = parseFloat(document.getElementById('trap-h').value);
+  let s1 = parseFloat(document.getElementById('trap-s1').value);
+  let s2 = parseFloat(document.getElementById('trap-s2').value);
+  let area = ((b1 + b2) / 2) * h;
+  let peri = b1 + b2 + s1 + s2;
+  document.getElementById('trap-result').textContent = `Area = ${area}, Perimeter = ${peri}`;
+}
+function areaPerimeterEllipse() {
+  let a = parseFloat(document.getElementById('ell-a').value);
+  let b = parseFloat(document.getElementById('ell-b').value);
+  let area = Math.PI * a * b;
+  let peri = Math.PI * (3*(a+b) - Math.sqrt((3*a+b)*(a+3*b))); // Ramanujan
+  document.getElementById('ell-result').textContent = `Area = ${area}, Perimeter ≈ ${peri}`;
+}
+function volumeSphere() {
+  let r = parseFloat(document.getElementById('sp-radius').value);
+  let vol = (4/3) * Math.PI * Math.pow(r,3);
+  document.getElementById('sp-result').textContent = `Volume = ${vol}`;
+}
+function volumeCylinder() {
+  let r = parseFloat(document.getElementById('cyl-radius').value);
+  let h = parseFloat(document.getElementById('cyl-h').value);
+  let vol = Math.PI * r * r * h;
+  document.getElementById('cyl-result').textContent = `Volume = ${vol}`;
+}
+function volumeCone() {
+  let r = parseFloat(document.getElementById('cone-radius').value);
+  let h = parseFloat(document.getElementById('cone-h').value);
+  let vol = (1/3) * Math.PI * r * r * h;
+  document.getElementById('cone-result').textContent = `Volume = ${vol}`;
+}
+function volumePrism() {
+  let l = parseFloat(document.getElementById('prism-l').value);
+  let w = parseFloat(document.getElementById('prism-w').value);
+  let h = parseFloat(document.getElementById('prism-h').value);
+  let vol = l * w * h;
+  document.getElementById('prism-result').textContent = `Volume = ${vol}`;
+}
+function distance2Points() {
+  let x1 = parseFloat(document.getElementById('dist-x1').value);
+  let y1 = parseFloat(document.getElementById('dist-y1').value);
+  let x2 = parseFloat(document.getElementById('dist-x2').value);
+  let y2 = parseFloat(document.getElementById('dist-y2').value);
+  let dist = Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+  document.getElementById('dist-result').textContent = `Distance = ${dist}`;
+}
+function midpointCalc() {
+  let x1 = parseFloat(document.getElementById('mid-x1').value);
+  let y1 = parseFloat(document.getElementById('mid-y1').value);
+  let x2 = parseFloat(document.getElementById('mid-x2').value);
+  let y2 = parseFloat(document.getElementById('mid-y2').value);
+  let mx = (x1 + x2) / 2;
+  let my = (y1 + y2) / 2;
+  document.getElementById('mid-result').textContent = `Midpoint = (${mx}, ${my})`;
+}
+function slopeCalc() {
+  let x1 = parseFloat(document.getElementById('slope-x1').value);
+  let y1 = parseFloat(document.getElementById('slope-y1').value);
+  let x2 = parseFloat(document.getElementById('slope-x2').value);
+  let y2 = parseFloat(document.getElementById('slope-y2').value);
+  let m = (y2 - y1) / (x2 - x1);
+  document.getElementById('slope-result').textContent = `Slope = ${m}`;
+}
+function areaTriangle() {
+  let b = parseFloat(document.getElementById('tri-base').value);
+  let h = parseFloat(document.getElementById('tri-height').value);
+  let area = 0.5 * b * h;
+  document.getElementById('triangle-result').textContent = `Area = ${area}`;
+}
+function pythagorean() {
+  let a = parseFloat(document.getElementById('pyth-a').value);
+  let b = parseFloat(document.getElementById('pyth-b').value);
+  let c = Math.sqrt(a * a + b * b);
+  document.getElementById('pyth-result').textContent = `c = ${c}`;
 }
 
-// System of Equations (2x2, using math.js)
-function setupSystem() {
-    document.getElementById('system-form').onsubmit = function(e) {
-        e.preventDefault();
-        const eq1 = document.getElementById('sys-eq1').value;
-        const eq2 = document.getElementById('sys-eq2').value;
-        let result = "";
-        try {
-            // Accepts equations like "2*x+3*y=8"
-            const parseEq = eq => {
-                const [lhs, rhs] = eq.split('=');
-                return math.simplify(lhs + "-(" + rhs + ")").toString();
-            };
-            const expr1 = parseEq(eq1);
-            const expr2 = parseEq(eq2);
-            const solutions = math.solve([expr1, expr2], ['x', 'y']);
-            if (solutions && solutions.x !== undefined && solutions.y !== undefined) {
-                result = `x = ${solutions.x}, y = ${solutions.y}`;
-            } else {
-                result = "No unique solution found.";
-            }
-        } catch (err) {
-            result = "Error: " + err.message;
-        }
-        animateAnswer(document.getElementById('system-result'), result);
-    };
-    document.getElementById('system-clear').onclick = function() {
-        document.getElementById('system-form').reset();
-        document.getElementById('system-result').innerHTML = '';
-    };
+// --- AI Chat (Demo/Stub) ---
+const chatMessages = document.getElementById('chat-messages');
+const aiSend = document.getElementById('ai-send');
+const userInput = document.getElementById('user-input');
+if (aiSend) {
+  aiSend.onclick = function() {
+    let msg = userInput.value.trim();
+    if (!msg) return;
+    chatMessages.innerHTML += `<div><b>You:</b> ${msg}</div>`;
+    setTimeout(() => {
+      chatMessages.innerHTML += `<div><b>AI:</b> <i>(Math AI demo)</i> The answer to "${msg}" is <b>${Math.floor(Math.random()*100)}</b>.</div>`;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 600);
+    userInput.value = '';
+  };
+  userInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') aiSend.click();
+  });
 }
 
-// Simplify Expression (using math.js)
-function setupSimplify() {
-    document.getElementById('simplify-form').onsubmit = function(e) {
-        e.preventDefault();
-        const expr = document.getElementById('simplify-input').value;
-        let result = "";
-        try {
-            result = math.simplify(expr).toString();
-        } catch (err) {
-            result = "Error: " + err.message;
-        }
-        animateAnswer(document.getElementById('simplify-result'), `Simplified: ${result}`);
-    };
-    document.getElementById('simplify-clear').onclick = function() {
-        document.getElementById('simplify-form').reset();
-        document.getElementById('simplify-result').innerHTML = '';
-    };
-}
-
-// Factor Polynomial (using math.js)
-function setupFactor() {
-    document.getElementById('factor-form').onsubmit = function(e) {
-        e.preventDefault();
-        const poly = document.getElementById('factor-input').value;
-        let result = "";
-        try {
-            result = math.factor(poly).toString();
-        } catch (err) {
-            result = "Error: " + err.message;
-        }
-        animateAnswer(document.getElementById('factor-result'), `Factored: ${result}`);
-    };
-    document.getElementById('factor-clear').onclick = function() {
-        document.getElementById('factor-form').reset();
-        document.getElementById('factor-result').innerHTML = '';
-    };
-}
-
-// Pythagorean Theorem with Clear
-function setupPythagorean() {
-    document.getElementById('pythag-form').onsubmit = function(e) {
-        e.preventDefault();
-        const a = parseFloat(document.getElementById('pythag-a').value);
-        const b = parseFloat(document.getElementById('pythag-b').value);
-        const c = Math.sqrt(a*a + b*b);
-        animateAnswer(document.getElementById('pythag-result'), `c = ${c}`);
-    };
-    document.getElementById('pythag-clear').onclick = function() {
-        document.getElementById('pythag-form').reset();
-        document.getElementById('pythag-result').innerHTML = '';
-    };
-}
-
-// Circle Area & Circumference with Clear
-function setupCircle() {
-    document.getElementById('circle-form').onsubmit = function(e) {
-        e.preventDefault();
-        const r = parseFloat(document.getElementById('circle-radius').value);
-        const area = Math.PI * r * r;
-        const circ = 2 * Math.PI * r;
-        animateAnswer(document.getElementById('circle-result'), `Area: ${area.toFixed(2)}, Circumference: ${circ.toFixed(2)}`);
-    };
-    document.getElementById('circle-clear').onclick = function() {
-        document.getElementById('circle-form').reset();
-        document.getElementById('circle-result').innerHTML = '';
-    };
-}
-
-// Triangle Area with Clear
-function setupTriangle() {
-    document.getElementById('triangle-form').onsubmit = function(e) {
-        e.preventDefault();
-        const base = parseFloat(document.getElementById('tri-base').value);
-        const height = parseFloat(document.getElementById('tri-height').value);
-        const area = 0.5 * base * height;
-        animateAnswer(document.getElementById('tri-result'), `Area: ${area}`);
-    };
-    document.getElementById('triangle-clear').onclick = function() {
-        document.getElementById('triangle-form').reset();
-        document.getElementById('tri-result').innerHTML = '';
-    };
-}
-
-// Rectangle Area & Perimeter with Clear
-function setupRectangle() {
-    document.getElementById('rect-form').onsubmit = function(e) {
-        e.preventDefault();
-        const l = parseFloat(document.getElementById('rect-l').value);
-        const w = parseFloat(document.getElementById('rect-w').value);
-        const area = l * w;
-        const peri = 2 * (l + w);
-        animateAnswer(document.getElementById('rect-result'), `Area: ${area}, Perimeter: ${peri}`);
-    };
-    document.getElementById('rect-clear').onclick = function() {
-        document.getElementById('rect-form').reset();
-        document.getElementById('rect-result').innerHTML = '';
-    };
-}
-
-// Square Area & Perimeter with Clear
-function setupSquare() {
-    document.getElementById('square-form').onsubmit = function(e) {
-        e.preventDefault();
-        const s = parseFloat(document.getElementById('square-s').value);
-        const area = s * s;
-        const peri = 4 * s;
-        animateAnswer(document.getElementById('square-result'), `Area: ${area}, Perimeter: ${peri}`);
-    };
-    document.getElementById('square-clear').onclick = function() {
-        document.getElementById('square-form').reset();
-        document.getElementById('square-result').innerHTML = '';
-    };
-}
-
-// Trapezoid Area with Clear
-function setupTrapezoid() {
-    document.getElementById('trap-form').onsubmit = function(e) {
-        e.preventDefault();
-        const b1 = parseFloat(document.getElementById('trap-b1').value);
-        const b2 = parseFloat(document.getElementById('trap-b2').value);
-        const h = parseFloat(document.getElementById('trap-h').value);
-        const area = 0.5 * (b1 + b2) * h;
-        animateAnswer(document.getElementById('trap-result'), `Area: ${area}`);
-    };
-    document.getElementById('trap-clear').onclick = function() {
-        document.getElementById('trap-form').reset();
-        document.getElementById('trap-result').innerHTML = '';
-    };
-}
-
-// Ellipse Area with Clear
-function setupEllipse() {
-    document.getElementById('ellipse-form').onsubmit = function(e) {
-        e.preventDefault();
-        const a = parseFloat(document.getElementById('ellipse-a').value);
-        const b = parseFloat(document.getElementById('ellipse-b').value);
-        const area = Math.PI * a * b;
-        animateAnswer(document.getElementById('ellipse-result'), `Area: ${area.toFixed(2)}`);
-    };
-    document.getElementById('ellipse-clear').onclick = function() {
-        document.getElementById('ellipse-form').reset();
-        document.getElementById('ellipse-result').innerHTML = '';
-    };
-}
-
-// Cube Volume with Clear
-function setupCube() {
-    document.getElementById('cube-form').onsubmit = function(e) {
-        e.preventDefault();
-        const s = parseFloat(document.getElementById('cube-s').value);
-        const vol = s * s * s;
-        animateAnswer(document.getElementById('cube-result'), `Volume: ${vol}`);
-    };
-    document.getElementById('cube-clear').onclick = function() {
-        document.getElementById('cube-form').reset();
-        document.getElementById('cube-result').innerHTML = '';
-    };
-}
-
-// Sphere Volume with Clear
-function setupSphere() {
-    document.getElementById('sphere-form').onsubmit = function(e) {
-        e.preventDefault();
-        const r = parseFloat(document.getElementById('sphere-r').value);
-        const vol = (4/3) * Math.PI * Math.pow(r, 3);
-        animateAnswer(document.getElementById('sphere-result'), `Volume: ${vol.toFixed(2)}`);
-    };
-    document.getElementById('sphere-clear').onclick = function() {
-        document.getElementById('sphere-form').reset();
-        document.getElementById('sphere-result').innerHTML = '';
-    };
-}
-
-// Cylinder Volume with Clear
-function setupCylinder() {
-    document.getElementById('cylinder-form').onsubmit = function(e) {
-        e.preventDefault();
-        const r = parseFloat(document.getElementById('cylinder-r').value);
-        const h = parseFloat(document.getElementById('cylinder-h').value);
-        const vol = Math.PI * r * r * h;
-        animateAnswer(document.getElementById('cylinder-result'), `Volume: ${vol.toFixed(2)}`);
-    };
-    document.getElementById('cylinder-clear').onclick = function() {
-        document.getElementById('cylinder-form').reset();
-        document.getElementById('cylinder-result').innerHTML = '';
-    };
-}
-
-// Cone Volume with Clear
-function setupCone() {
-    document.getElementById('cone-form').onsubmit = function(e) {
-        e.preventDefault();
-        const r = parseFloat(document.getElementById('cone-r').value);
-        const h = parseFloat(document.getElementById('cone-h').value);
-        const vol = (1/3) * Math.PI * r * r * h;
-        animateAnswer(document.getElementById('cone-result'), `Volume: ${vol.toFixed(2)}`);
-    };
-    document.getElementById('cone-clear').onclick = function() {
-        document.getElementById('cone-form').reset();
-        document.getElementById('cone-result').innerHTML = '';
-    };
-}
-
-// Animated answer display
-function animateAnswer(container, text) {
-    container.innerHTML = `<div class="animated-answer">${text}</div>`;
-}
-
-// AI Chatbot (Demo)
-document.getElementById('ai-send').onclick = handleAIQuery;
-document.getElementById('user-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') handleAIQuery();
-});
-function handleAIQuery() {
-  const userInput = document.getElementById('user-input').value.trim();
-  if (!userInput) return;
-  const chat = document.getElementById('chat-messages');
-  chat.innerHTML += `<div><b>You:</b> ${userInput}</div>`;
-  document.getElementById('user-input').value = '';
-  chat.scrollTop = chat.scrollHeight;
-  setTimeout(() => {
-    let response = "I'm Numix AI! I can help with math. Try asking about algebra or geometry.";
-    chat.innerHTML += `<div><b>Numix AI:</b> ${response}</div>`;
-    chat.scrollTop = chat.scrollHeight;
-  }, 700);
-}
-
-// Show home by default
-showMode('home');
+// --- Initialize default calculators on load ---
+showAlgebra('simple');
+showGeometry('circle');
