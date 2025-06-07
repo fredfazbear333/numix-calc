@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Numix Calc</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<nav class="mode-selector">
+  <div class="logo" id="logo-link" style="cursor:pointer;">
+    <div class="logo-img-rect">
+      <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo">
+    </div>
+
+  </div>
+  <button class="mode-btn" data-mode="home">Home</button>
+  <button class="mode-btn" data-mode="algebra">Algebra</button>
+  <button class="mode-btn" data-mode="geometry">Geometry</button>
+  <button class="mode-btn" data-mode="ai">AI Help (Not working yet)</button>
+</nav>
+
+<main class="mode-content" id="home">
+  <div class="home-bg">
+    <div class="home-content">
+      <div class="home-logo-rect">
+        <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo">
+      </div>
+      <h1>Welcome to Numix</h1>
+      <p class="home-desc">
+        Math made easy.
+      </p>
+    </div>
+  </div>
+</main>
+
+<!-- The rest of your HTML (algebra, geometry, ai modes) stays the same. -->
+
+
+<main class="mode-content" id="algebra">
+  <div class="calculator-container">
+    <section class="main-calculator" id="algebra-main"></section>
+    <aside class="tools-sidebar" id="algebra-tools">
+      <div class="tool-item" data-tool="basic">Basic Calculator</div>
+      <div class="tool-item" data-tool="scientific">Scientific Calculator</div>
+      <div class="tool-item" data-tool="quadratic">Quadratic Equations</div>
+      <div class="tool-item" data-tool="linear">Linear Equations</div>
+      <div class="tool-item" data-tool="inequality">Inequality Solver</div>
+      <div class="tool-item" data-tool="system">System of Equations (2x2)</div>
+      <div class="tool-item" data-tool="simplify">Simplify Expression</div>
+      <div class="tool-item" data-tool="factor">Factor Polynomial</div>
+    </aside>
+  </div>
+</main>
+
+<main class="mode-content" id="geometry">
+  <div class="calculator-container">
+    <section class="main-calculator" id="geometry-main"></section>
+    <aside class="tools-sidebar" id="geometry-tools">
+      <div class="tool-item" data-tool="pythagorean">Pythagorean Theorem</div>
+      <div class="tool-item" data-tool="circle-area">Circle Area</div>
+      <div class="tool-item" data-tool="triangle-area">Triangle Area</div>
+      <div class="tool-item" data-tool="rectangle">Rectangle Area & Perimeter</div>
+      <div class="tool-item" data-tool="square">Square Area & Perimeter</div>
+      <div class="tool-item" data-tool="trapezoid">Trapezoid Area</div>
+      <div class="tool-item" data-tool="ellipse">Ellipse Area</div>
+      <div class="tool-item" data-tool="cube">Cube Volume</div>
+      <div class="tool-item" data-tool="sphere">Sphere Volume</div>
+      <div class="tool-item" data-tool="cylinder">Cylinder Volume</div>
+      <div class="tool-item" data-tool="cone">Cone Volume</div>
+    </aside>
+  </div>
+</main>
+
+<main class="mode-content" id="ai">
+  <section class="ai-chat">
+    <div id="chat-messages"></div>
+    <div class="ai-input-row">
+      <input type="text" id="user-input" placeholder="Ask math question...">
+      <button id="ai-send">Send</button>
+    </div>
+  </section>
+</main>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js'></script><script  src="./script.js"></script>
+
+</body>
+</html>
