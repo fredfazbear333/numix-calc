@@ -1,94 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Numix Calculator</title>
-  <meta name="viewport" content="width=1024">
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="mode-selector">
-    <div class="logo">
-      <div class="logo-img-rect">
-        <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo">
+<div class="mode-selector">
+  <div class="logo">
+    <div class="logo-img-rect">
+      <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo">
+    </div>
+  </div>
+  <button class="mode-btn active" onclick="showMode('home')">Home</button>
+  <button class="mode-btn" onclick="showMode('algebra')">Algebra</button>
+  <button class="mode-btn" onclick="showMode('geometry')">Geometry</button>
+  <button class="mode-btn" onclick="showMode('ai')">AI Help (Demo)</button>
+</div>
+
+<main>
+  <!-- Home Page -->
+  <section id="home" class="mode-content home-bg" style="display:flex;">
+    <div class="home-content">
+      <div class="home-logo-rect">
+        <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo Large">
+      </div>
+      <h1>Welcome to Numix Calculator Beta</h1>
+      <div class="home-desc">
+        Math made easy.
       </div>
     </div>
-    <button class="mode-btn active" onclick="showMode('home')">Home</button>
-    <button class="mode-btn" onclick="showMode('algebra')">Algebra</button>
-    <button class="mode-btn" onclick="showMode('geometry')">Geometry</button>
-    <button class="mode-btn" onclick="showMode('ai')">AI Help (Demo)</button>
+  </section>
+
+  <!-- Algebra Mode -->
+  <section id="algebra" class="mode-content" style="display:none;">
+    <div class="calculator-container">
+      <div class="main-calculator" id="algebra-main">
+        <!-- Example Algebra Calculator -->
+        <form>
+          <input type="text" placeholder="Enter value..." style="margin-bottom:1em; padding:0.7em; border-radius:12px; border:1px solid #cfd8dc; font-size:1.1em;">
+          <div class="calculator-actions">
+            <button type="button" class="numix-btn clear-btn">Clear</button>
+            <button type="submit" class="numix-btn solve-btn">Solve</button>
+          </div>
+        </form>
+      </div>
+      <aside class="tools-sidebar right" id="algebra-tools">
+        <div class="tool-item" onclick="showAlgebra('simple')">Simple Calculator</div>
+        <div class="tool-item" onclick="showAlgebra('scientific')">Scientific Calculator</div>
+        <div class="tool-item" onclick="showAlgebra('linear')">Linear Equation Solver</div>
+        <div class="tool-item" onclick="showAlgebra('quadratic')">Quadratic Solver</div>
+        <div class="tool-item" onclick="showAlgebra('fraction')">Fraction Simplifier</div>
+        <div class="tool-item" onclick="showAlgebra('system')">System of Equations</div>
+        <div class="tool-item" onclick="showAlgebra('polynomial')">Cubic Polynomial Solver</div>
+        <div class="tool-item" onclick="showAlgebra('rational')">Rational Expression Simplifier</div>
+        <div class="tool-item" onclick="showAlgebra('exproot')">Exponent/Root Calculator</div>
+        <div class="tool-item" onclick="showAlgebra('sci-notation')">Scientific Notation Converter</div>
+        <div class="tool-item" onclick="showAlgebra('sequence')">Sequence Calculator</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Geometry Mode -->
+  <section id="geometry" class="mode-content" style="display:none;">
+    <div class="calculator-container">
+      <div class="main-calculator" id="geometry-main">
+        <!-- Example Geometry Calculator -->
+        <form>
+          <input type="text" placeholder="Enter value..." style="margin-bottom:1em; padding:0.7em; border-radius:12px; border:1px solid #cfd8dc; font-size:1.1em;">
+          <div class="calculator-actions">
+            <button type="button" class="numix-btn clear-btn">Clear</button>
+            <button type="submit" class="numix-btn solve-btn">Solve</button>
+          </div>
+        </form>
+      </div>
+      <aside class="tools-sidebar right" id="geometry-tools">
+        <div class="tool-item" onclick="showGeometry('circle')">Circle (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('rectangle')">Rectangle (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('square')">Square (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('parallelogram')">Parallelogram (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('trapezoid')">Trapezoid (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('ellipse')">Ellipse (Area/Perimeter)</div>
+        <div class="tool-item" onclick="showGeometry('sphere')">Sphere (Volume)</div>
+        <div class="tool-item" onclick="showGeometry('cylinder')">Cylinder (Volume)</div>
+        <div class="tool-item" onclick="showGeometry('cone')">Cone (Volume)</div>
+        <div class="tool-item" onclick="showGeometry('prism')">Rectangular Prism (Volume)</div>
+        <div class="tool-item" onclick="showGeometry('distance')">Distance (2 Points)</div>
+        <div class="tool-item" onclick="showGeometry('midpoint')">Midpoint</div>
+        <div class="tool-item" onclick="showGeometry('slope')">Slope</div>
+        <div class="tool-item" onclick="showGeometry('triangle')">Triangle (Area)</div>
+        <div class="tool-item" onclick="showGeometry('pythagorean')">Pythagorean Theorem</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- AI Help -->
+  <section id="ai" class="mode-content" style="display:none;">
+    <div class="ai-chat">
+      <div id="chat-messages"></div>
+      <div class="ai-input-row">
+        <input type="text" id="user-input" placeholder="Ask a math question...">
+        <button id="ai-send">Send</button>
+      </div>
+    </div>
+  </section>
+  <!-- footer with ceo thingy -->
+  <footer class="site-footer">
+  <div class="footer-content">
+    <span>
+      © 2025 Numix Calculator &mdash; Founded and led by Frederic Phelizon, CEO.
+    </span>
+    <span class="footer-contact">
+      Feedback? <a href="mailto:numx.calc@gmail.com">numx.calc@gmail.com</a>
+    </span>
   </div>
-
-  <main>
-    <!-- Home Page -->
-    <section id="home" class="mode-content home-bg" style="display:flex;">
-      <div class="home-content">
-        <div class="home-logo-rect">
-          <img src="https://res.cloudinary.com/dub39qv2e/image/upload/v1749252256/Screenshot_2025-06-06_at_7.10.02_PM_ww5bqy.png" alt="Numix Logo Large">
-        </div>
-        <h1>Welcome to Numix Calculator Beta</h1>
-        <div class="home-desc">
-         Math made easy.
-        </div>
-      </div>
-    </section>
-
-    <!-- Algebra Mode -->
-    <section id="algebra" class="mode-content" style="display:none;">
-      <div class="calculator-container">
-        <div class="main-calculator" id="algebra-main"></div>
-        <aside class="tools-sidebar right" id="algebra-tools">
-          <div class="tool-item" onclick="showAlgebra('simple')">Simple Calculator</div>
-          <div class="tool-item" onclick="showAlgebra('scientific')">Scientific Calculator</div>
-          <div class="tool-item" onclick="showAlgebra('linear')">Linear Equation Solver</div>
-          <div class="tool-item" onclick="showAlgebra('quadratic')">Quadratic Solver</div>
-          <div class="tool-item" onclick="showAlgebra('fraction')">Fraction Simplifier</div>
-          <div class="tool-item" onclick="showAlgebra('system')">System of Equations</div>
-          <div class="tool-item" onclick="showAlgebra('polynomial')">Cubic Polynomial Solver</div>
-          <div class="tool-item" onclick="showAlgebra('rational')">Rational Expression Simplifier</div>
-          <div class="tool-item" onclick="showAlgebra('exproot')">Exponent/Root Calculator</div>
-          <div class="tool-item" onclick="showAlgebra('sci-notation')">Scientific Notation Converter</div>
-          <div class="tool-item" onclick="showAlgebra('sequence')">Sequence Calculator</div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- Geometry Mode -->
-    <section id="geometry" class="mode-content" style="display:none;">
-      <div class="calculator-container">
-        <div class="main-calculator" id="geometry-main"></div>
-        <aside class="tools-sidebar right" id="geometry-tools">
-          <div class="tool-item" onclick="showGeometry('circle')">Circle (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('rectangle')">Rectangle (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('square')">Square (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('parallelogram')">Parallelogram (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('trapezoid')">Trapezoid (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('ellipse')">Ellipse (Area/Perimeter)</div>
-          <div class="tool-item" onclick="showGeometry('sphere')">Sphere (Volume)</div>
-          <div class="tool-item" onclick="showGeometry('cylinder')">Cylinder (Volume)</div>
-          <div class="tool-item" onclick="showGeometry('cone')">Cone (Volume)</div>
-          <div class="tool-item" onclick="showGeometry('prism')">Rectangular Prism (Volume)</div>
-          <div class="tool-item" onclick="showGeometry('distance')">Distance (2 Points)</div>
-          <div class="tool-item" onclick="showGeometry('midpoint')">Midpoint</div>
-          <div class="tool-item" onclick="showGeometry('slope')">Slope</div>
-          <div class="tool-item" onclick="showGeometry('triangle')">Triangle (Area)</div>
-          <div class="tool-item" onclick="showGeometry('pythagorean')">Pythagorean Theorem</div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- AI Help -->
-    <section id="ai" class="mode-content" style="display:none;">
-      <div class="ai-chat">
-        <div id="chat-messages"></div>
-        <div class="ai-input-row">
-          <input type="text" id="user-input" placeholder="Ask a math question...">
-          <button id="ai-send">Send</button>
-        </div>
-      </div>
-    </section>
-  </main>
-  <script src="script.js"></script>
-</body>
-</html>
+</footer>
+</main>
