@@ -386,3 +386,33 @@ form label {
   transform: scale(0.97);
 }
 /* --- END Numix button styles --- */
+.site-footer {
+  background: #181a1b;
+  color: #b0b6ba;
+  text-align: center;
+  padding: 1.5em 0 1em 0;
+  font-size: 1.05em;
+  border-top: 1px solid #232526;
+  margin-top: 3em;
+  letter-spacing: 0.01em;
+}
+.site-footer .footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  align-items: center;
+}
+.site-footer .footer-contact a {
+  color: #6ec1e4;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer .footer-contact a:hover {
+  color: #3fa2d6;
+}
+@media (max-width: 600px) {
+  .site-footer {
+    font-size: 0.98em;
+    padding: 1em 0 0.7em 0;
+  }
+}
